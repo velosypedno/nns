@@ -82,7 +82,7 @@ func (n *Network) String() string {
 	return sb.String()
 }
 
-func (n *Network) Forward(inputs *mat.Dense) *mat.Dense {
+func (n *Network) forward(inputs *mat.Dense) *mat.Dense {
 	var currInputs = inputs
 	for _, l := range n.Layers {
 		currInputs = l.Forward(currInputs)
@@ -91,11 +91,11 @@ func (n *Network) Forward(inputs *mat.Dense) *mat.Dense {
 }
 
 func (n *Network) Predict(inputs *mat.Dense) *mat.Dense {
-	logits := n.Forward(inputs)
+	logits := n.forward(inputs)
 	return n.Loss.Transform(logits)
 }
 
-func (n *Network) Backward(targets, outs *mat.Dense) {
+func (n *Network) backward(targets, outs *mat.Dense) {
 	currentGradient := n.Loss.Derivative(outs, targets)
 
 	currentBatchSize, _ := targets.Dims()
@@ -107,7 +107,7 @@ func (n *Network) Backward(targets, outs *mat.Dense) {
 	}
 }
 
-func (n *Network) Train(X, Y *mat.Dense) {
+func (n *Network) Fit(X, Y *mat.Dense) {
 	nSamples, nInputs := X.Dims()
 	_, nOutputs := Y.Dims()
 
@@ -131,8 +131,8 @@ func (n *Network) Train(X, Y *mat.Dense) {
 			batchX := X.Slice(i, end, 0, nInputs).(*mat.Dense)
 			batchY := Y.Slice(i, end, 0, nOutputs).(*mat.Dense)
 
-			output := n.Forward(batchX)
-			n.Backward(batchY, output)
+			output := n.forward(batchX)
+			n.backward(batchY, output)
 
 			epochLoss += n.Loss.Calculate(output, batchY)
 			numBatches++
