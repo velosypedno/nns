@@ -1,4 +1,4 @@
-package network
+package cnn
 
 import (
 	"encoding/gob"
@@ -8,13 +8,13 @@ import (
 	"go.uber.org/zap"
 )
 
-func (n *Network) Save(w io.Writer) error {
+func (n *CNN) Save(w io.Writer) error {
 	encoder := gob.NewEncoder(w)
 	return encoder.Encode(n)
 }
 
-func LoadNetwork(r io.Reader) (*Network, error) {
-	var n Network
+func Load(r io.Reader) (*CNN, error) {
+	var n CNN
 	decoder := gob.NewDecoder(r)
 	err := decoder.Decode(&n)
 	if err != nil {
@@ -24,7 +24,7 @@ func LoadNetwork(r io.Reader) (*Network, error) {
 	return &n, nil
 }
 
-func (n *Network) SaveToFile(filename string) error {
+func (n *CNN) SaveToFile(filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -33,11 +33,11 @@ func (n *Network) SaveToFile(filename string) error {
 	return n.Save(file)
 }
 
-func LoadFromFile(filename string) (*Network, error) {
+func LoadFromFile(filename string) (*CNN, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-	return LoadNetwork(file)
+	return Load(file)
 }

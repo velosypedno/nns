@@ -1,4 +1,4 @@
-package network
+package mlp
 
 import (
 	"encoding/gob"
@@ -32,7 +32,7 @@ type Layer interface {
 	fmt.Stringer
 }
 
-type Network struct {
+type MLP struct {
 	Layers       []Layer
 	LearningRate float64
 	Loss         Loss
@@ -43,7 +43,7 @@ type Network struct {
 	epochs      int
 }
 
-func New(layers []Layer, lr float64, lossFunc Loss, opts ...Option) *Network {
+func New(layers []Layer, lr float64, lossFunc Loss, opts ...Option) *MLP {
 	conf := &Config{
 		Logger:      zap.NewNop(),
 		LogInterval: 10000,
@@ -54,7 +54,7 @@ func New(layers []Layer, lr float64, lossFunc Loss, opts ...Option) *Network {
 	for _, opt := range opts {
 		opt(conf)
 	}
-	return &Network{
+	return &MLP{
 		Layers:       layers,
 		LearningRate: lr,
 		Loss:         lossFunc,
@@ -66,7 +66,7 @@ func New(layers []Layer, lr float64, lossFunc Loss, opts ...Option) *Network {
 	}
 }
 
-func (n *Network) String() string {
+func (n *MLP) String() string {
 	var sb strings.Builder
 	sb.WriteString("==========================================\n")
 	sb.WriteString(fmt.Sprintf("Neural Network (Learning Rate: %.4f)\n", n.LearningRate))
@@ -82,7 +82,7 @@ func (n *Network) String() string {
 	return sb.String()
 }
 
-func (n *Network) forward(inputs *mat.Dense) *mat.Dense {
+func (n *MLP) forward(inputs *mat.Dense) *mat.Dense {
 	var currInputs = inputs
 	for _, l := range n.Layers {
 		currInputs = l.Forward(currInputs)
@@ -90,12 +90,12 @@ func (n *Network) forward(inputs *mat.Dense) *mat.Dense {
 	return currInputs
 }
 
-func (n *Network) Predict(inputs *mat.Dense) *mat.Dense {
+func (n *MLP) Predict(inputs *mat.Dense) *mat.Dense {
 	logits := n.forward(inputs)
 	return n.Loss.Transform(logits)
 }
 
-func (n *Network) backward(targets, outs *mat.Dense) {
+func (n *MLP) backward(targets, outs *mat.Dense) {
 	currentGradient := n.Loss.Derivative(outs, targets)
 
 	currentBatchSize, _ := targets.Dims()
@@ -107,7 +107,7 @@ func (n *Network) backward(targets, outs *mat.Dense) {
 	}
 }
 
-func (n *Network) Fit(X, Y *mat.Dense) {
+func (n *MLP) Fit(X, Y *mat.Dense) {
 	nSamples, nInputs := X.Dims()
 	_, nOutputs := Y.Dims()
 

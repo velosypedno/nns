@@ -1,4 +1,4 @@
-package network
+package mlp
 
 import "go.uber.org/zap"
 
@@ -35,6 +35,6 @@ func WithEpochs(epochs int) Option {
 	}
 }
 
-func (n *Network) SetLogger(l *zap.Logger) {
+func (n *MLP) SetLogger(l *zap.Logger) {
 	n.logger = l
 }
