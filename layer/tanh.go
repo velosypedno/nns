@@ -47,3 +47,5 @@ func (l *Tanh) Backward(upstreamGradient *mat.Dense, lr float64) *mat.Dense {
 
 	return downstream
 }
+
+func (l *Tanh) SetTraining(_ bool) {}

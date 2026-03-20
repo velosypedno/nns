@@ -16,6 +16,7 @@ func init() {
 	gob.Register(&layer.Conv{})
 	gob.Register(&layer.MaxPool{})
 	gob.Register(&layer.ReLU{})
+	gob.Register(&layer.Dropout{})
 
 	gob.Register(&loss.MSE{})
 	gob.Register(&loss.SoftMaxCrossEntropy{})
@@ -24,11 +25,13 @@ func init() {
 type CNNLayer interface {
 	Forward(inputs *mat.Dense) *mat.Dense
 	Backward(upstreamGradient *mat.Dense, lr float64) *mat.Dense
+	SetTraining(bool)
 }
 
 type MLPLayer interface {
 	Forward(inputs *mat.Dense) *mat.Dense
 	Backward(upstreamGradient *mat.Dense, lr float64) *mat.Dense
+	SetTraining(bool)
 	fmt.Stringer
 }
 
@@ -76,6 +79,15 @@ func New(convLayers []CNNLayer, classifierLayers []MLPLayer, opts ...Option) *CN
 	}
 }
 
+func (n *CNN) setTraining(isTraining bool) {
+	for _, l := range n.ClassifierLayers {
+		l.SetTraining(isTraining)
+	}
+	for _, l := range n.ConvLayers {
+		l.SetTraining(isTraining)
+	}
+}
+
 func (n *CNN) forward(inputs *mat.Dense) *mat.Dense {
 	var currInputs = inputs
 	for _, l := range n.ConvLayers {
@@ -90,6 +102,7 @@ func (n *CNN) forward(inputs *mat.Dense) *mat.Dense {
 }
 
 func (n *CNN) Predict(inputs *mat.Dense) *mat.Dense {
+	n.setTraining(false)
 	logits := n.forward(inputs)
 	return n.Loss.Transform(logits)
 }
@@ -111,6 +124,7 @@ func (n *CNN) backward(targets, outs *mat.Dense) {
 }
 
 func (n *CNN) Fit(X, Y *mat.Dense) {
+	n.setTraining(true)
 	nSamples, nInputs := X.Dims()
 	_, nOutputs := Y.Dims()
 

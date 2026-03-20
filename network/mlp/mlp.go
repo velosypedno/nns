@@ -15,6 +15,7 @@ import (
 func init() {
 	gob.Register(&layer.Dense{})
 	gob.Register(&layer.Tanh{})
+	gob.Register(&layer.Dropout{})
 
 	gob.Register(&loss.MSE{})
 	gob.Register(&loss.SoftMaxCrossEntropy{})

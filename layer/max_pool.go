@@ -91,3 +91,5 @@ func (l *MaxPool) Backward(gradOutput *mat.Dense, lr float64) *mat.Dense {
 
 	return mat.NewDense(batchSize, inFeatures, gradInputData)
 }
+
+func (l *MaxPool) SetTraining(_ bool) {}

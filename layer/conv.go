@@ -101,3 +101,5 @@ func (l *Conv) Backward(gradOutput *mat.Dense, lr float64) *mat.Dense {
 
 	return gradInput
 }
+
+func (l *Conv) SetTraining(_ bool) {}

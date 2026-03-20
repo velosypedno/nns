@@ -66,3 +66,5 @@ func (l *ReLU) GobEncode() ([]byte, error) {
 func (l *ReLU) GobDecode(data []byte) error {
 	return nil
 }
+
+func (l *ReLU) SetTraining(_ bool) {}

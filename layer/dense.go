@@ -13,6 +13,7 @@ type Dense struct {
 	Biases  *mat.Dense
 
 	LastInputs *mat.Dense
+	L2Lambda   float64
 }
 
 func (l *Dense) String() string {
@@ -34,7 +35,7 @@ func randomInit(r, c int) *mat.Dense {
 	return mat.NewDense(r, c, data)
 }
 
-func NewDense(r, c int) *Dense {
+func NewDense(r, c int, l2Lambda float64) *Dense {
 	weights := randomInit(r, c)
 	biases := mat.NewDense(1, c, nil)
 	return &Dense{
@@ -42,6 +43,7 @@ func NewDense(r, c int) *Dense {
 		Biases:  biases,
 
 		LastInputs: new(mat.Dense),
+		L2Lambda:   l2Lambda,
 	}
 }
 
@@ -66,9 +68,14 @@ func (l *Dense) Backward(upstreamGradient *mat.Dense, lr float64) *mat.Dense {
 	var currentGrad mat.Dense
 	currentGrad.Mul(l.LastInputs.T(), upstreamGradient)
 
+	if l.L2Lambda > 0 {
+		var l2Grad mat.Dense
+		l2Grad.Scale(2*l.L2Lambda, l.Weights)
+		currentGrad.Add(&currentGrad, &l2Grad)
+	}
+
 	var downstreamGradient mat.Dense
 	downstreamGradient.Mul(upstreamGradient, l.Weights.T())
-
 	currentGrad.Scale(lr, &currentGrad)
 
 	l.Weights.Sub(l.Weights, &currentGrad)
@@ -90,3 +97,5 @@ func (l *Dense) Backward(upstreamGradient *mat.Dense, lr float64) *mat.Dense {
 
 	return &downstreamGradient
 }
+
+func (l *Dense) SetTraining(_ bool) {}

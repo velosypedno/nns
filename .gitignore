@@ -2,3 +2,4 @@ cmd/
 data/
 dataset/
 model.gob
+*.gob
