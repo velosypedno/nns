@@ -1,6 +1,8 @@
 package layer
 
 import (
+	"fmt"
+
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -47,6 +49,14 @@ func (l *ReLU) Backward(gradOutput *mat.Dense, lr float64) *mat.Dense {
 	}
 
 	return mat.NewDense(r, c, dXData)
+}
+
+func (l *ReLU) String() string {
+	if l.lastInputs == nil {
+		return "Activation: ReLu (not initialized)"
+	}
+	_, cols := l.lastInputs.Dims()
+	return fmt.Sprintf("Activation: ReLu (Features: %d)", cols)
 }
 
 func (l *ReLU) GobEncode() ([]byte, error) {
